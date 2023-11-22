@@ -27,3 +27,10 @@ document.addEventListener("DOMContentLoaded", function() {
   // Update the counter every second
   setInterval(updateCounter, 1000);
 });
+
+
+document.querySelectorAll('.floating-cat').forEach(cat => {
+  cat.style.left = Math.random() * window.innerWidth + 'px';
+  cat.style.top = Math.random() * window.innerHeight + 'px';
+});
+

@@ -3,6 +3,20 @@
 <head>
   <meta charset="UTF-8">
   <title>MTB matters!</title>
+  <style>
+  .floating-cat {
+    position: fixed;
+    width: 100px; /* Adjust as needed */
+    height: auto;
+    animation: float 5s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-20px); }
+  }
+</style>
+
 </head>
 <body style="font-family: Arial, sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #642f66;">
   <div class="container" style="text-align: center;">
@@ -13,6 +27,7 @@
       <p id="counterText" style="font-size: 4em;"></p>
     </div>
   </div>
+  <img src="https://media1.giphy.com/media/ysFsUIf1xSmw7zz68Y/giphy.gif?cid=6c09b952y4axo2eadktw1gpudhyfcj0pvvqfvwd7hjm5x8fj&ep=v1_stickers_related&rid=giphy.gif&ct=s" alt="Floating Cat" class="floating-cat">
   <script src="script.js"></script>
 </body>
 </html>
