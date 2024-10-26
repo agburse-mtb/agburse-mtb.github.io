@@ -1,8 +1,8 @@
 document.addEventListener("DOMContentLoaded", function() {
   const counterText = document.getElementById("counterText");
 
-  // Set the date for October 1st, 2023
-  const octoberFirst = new Date("2023-10-01");
+  // Set the date for October 1st, 2024
+  const octoberFirst = new Date("2024-10-01");
 
   function updateCounter() {
     // Get the current date and time
