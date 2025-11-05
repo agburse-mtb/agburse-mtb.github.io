@@ -122,6 +122,10 @@ document.addEventListener("DOMContentLoaded", function() {
     return { n, mean, median, min, max };
   }
 
+  let delayChart = null;
+  let wsVsSsChart = null;
+  let distributionChart = null;
+
   function renderReleases() {
     if (!releaseTableBody || !releaseStats) return;
 
@@ -149,7 +153,7 @@ document.addEventListener("DOMContentLoaded", function() {
       delaysAll.push(delayDays);
       (isWS ? delaysWS : delaysSS).push(delayDays);
 
-      rows.push({ label: item.label, planned, actual, delayDays });
+      rows.push({ label: item.label, planned, actual, delayDays, isWS });
     }
 
     rows.sort((a, b) => b.planned - a.planned);
@@ -158,10 +162,10 @@ document.addEventListener("DOMContentLoaded", function() {
       const delayColor = r.delayDays > 0 ? '#b30000' : (r.delayDays === 0 ? '#444' : '#0a7b00');
       return `
         <tr>
-          <td style="padding: 8px; border-bottom: 1px transparent #ddd;">${r.label}</td>
-          <td style="padding: 8px; border-bottom: 1px transparent #ddd;">${formatDateDDMMYYYY(r.planned)}</td>
-          <td style="padding: 8px; border-bottom: 1px transparent #ddd;">${r.actual ? formatDateDDMMYYYY(r.actual) : '<em>nicht veröffentlicht</em>'}</td>
-          <td style=\"padding: 8px; border-bottom: 1px transparent #ddd; text-align: right; color: ${delayColor};\">${r.delayDays}</td>
+          <td style="padding: 12px; border-bottom: 1px transparent #ddd; font-size: 1.2em;">${r.label}</td>
+          <td style="padding: 12px; border-bottom: 1px transparent #ddd; font-size: 1.2em;">${formatDateDDMMYYYY(r.planned)}</td>
+          <td style="padding: 12px; border-bottom: 1px transparent #ddd; font-size: 1.2em;">${r.actual ? formatDateDDMMYYYY(r.actual) : '<em>nicht veröffentlicht</em>'}</td>
+          <td style=\"padding: 12px; border-bottom: 1px transparent #ddd; text-align: right; color: ${delayColor}; font-size: 1.2em;\">${r.delayDays}</td>
         </tr>
       `;
     }).join('');
@@ -180,6 +184,203 @@ document.addEventListener("DOMContentLoaded", function() {
       </div>
       <div style="margin-top: 6px; color: #555;">Verzug = veröffentlichter Tag minus geplanter Stichtag (positiv = zu spät).</div>
     `;
+
+    // Render charts
+    renderCharts(rows, delaysAll, delaysWS, delaysSS, wsStats, ssStats);
+  }
+
+  function renderCharts(rows, delaysAll, delaysWS, delaysSS, wsStats, ssStats) {
+    if (typeof Chart === 'undefined') return; // Chart.js not loaded yet
+
+    // Chart 1: Delay over time (line chart)
+    const ctx1 = document.getElementById('delayOverTimeChart');
+    if (ctx1) {
+      const sortedByTime = [...rows].sort((a, b) => a.planned - b.planned);
+      const labels = sortedByTime.map(r => r.label);
+      const delayValues = sortedByTime.map(r => r.delayDays);
+      const colors = sortedByTime.map(r => r.delayDays > 0 ? '#b30000' : (r.delayDays === 0 ? '#444' : '#0a7b00'));
+
+      if (delayChart) delayChart.destroy();
+      delayChart = new Chart(ctx1, {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [{
+            label: 'Verzug (Tage)',
+            data: delayValues,
+            borderColor: '#642f66',
+            backgroundColor: '#c5a3ca',
+            borderWidth: 2,
+            pointRadius: 5,
+            pointBackgroundColor: colors,
+            pointBorderColor: '#fff',
+            pointBorderWidth: 2,
+            tension: 0.1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              display: true,
+              labels: { font: { size: 16, color: '#000' } }
+            },
+            tooltip: { 
+              enabled: true,
+              bodyFont: { size: 14, color: '#000' },
+              titleFont: { size: 16, color: '#000' }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: false,
+              title: { 
+                display: true, 
+                text: 'Verzug (Tage)',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              },
+              ticks: { font: { size: 14, color: '#000' } }
+            },
+            x: {
+              title: { 
+                display: true, 
+                text: 'Ausgabe',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              },
+              ticks: { font: { size: 14, color: '#000' } }
+            }
+          }
+        }
+      });
+    }
+
+    // Chart 2: WS vs SS comparison (bar chart)
+    const ctx2 = document.getElementById('wsVsSsChart');
+    if (ctx2) {
+      if (wsVsSsChart) wsVsSsChart.destroy();
+      wsVsSsChart = new Chart(ctx2, {
+        type: 'bar',
+        data: {
+          labels: ['WS', 'SS'],
+          datasets: [{
+            label: 'Mittlerer Verzug (Tage)',
+            data: [Math.round(wsStats.mean * 10) / 10, Math.round(ssStats.mean * 10) / 10],
+            backgroundColor: ['#642f66', '#642f66'],
+            borderColor: ['#642f66', '#642f66'],
+            borderWidth: 2
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              display: true,
+              labels: { font: { size: 16, color: '#000' } }
+            },
+            tooltip: { 
+              enabled: true,
+              bodyFont: { size: 14, color: '#000' },
+              titleFont: { size: 16, color: '#000' }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              title: { 
+                display: true, 
+                text: 'Mittlerer Verzug (Tage)',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              },
+              ticks: { font: { size: 14, color: '#000' } }
+            },
+            x: {
+              ticks: { font: { size: 14, color: '#000' } },
+              title: {
+                display: true,
+                text: '',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // Chart 3: Delay distribution (histogram)
+    const ctx3 = document.getElementById('delayDistributionChart');
+    if (ctx3) {
+      // Create bins for histogram
+      const minDelay = Math.min(...delaysAll);
+      const maxDelay = Math.max(...delaysAll);
+      const binCount = Math.min(10, delaysAll.length);
+      const binSize = (maxDelay - minDelay) / binCount;
+      const bins = Array(binCount).fill(0).map((_, i) => ({
+        label: `${Math.round(minDelay + i * binSize)}-${Math.round(minDelay + (i + 1) * binSize)}`,
+        min: minDelay + i * binSize,
+        max: minDelay + (i + 1) * binSize
+      }));
+      const binCounts = bins.map(bin => delaysAll.filter(d => d >= bin.min && (d < bin.max || (d === bin.max && bin.max === maxDelay))).length);
+
+      if (distributionChart) distributionChart.destroy();
+      distributionChart = new Chart(ctx3, {
+        type: 'bar',
+        data: {
+          labels: bins.map(b => b.label),
+          datasets: [{
+            label: 'Anzahl Ausgaben',
+            data: binCounts,
+            backgroundColor: '#642f66',
+            borderColor: '#642f66',
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { 
+              display: true,
+              labels: { font: { size: 16, color: '#000' } }
+            },
+            tooltip: { 
+              enabled: true,
+              bodyFont: { size: 14, color: '#000' },
+              titleFont: { size: 16, color: '#000' }
+            }
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: { 
+                stepSize: 1,
+                font: { size: 14, color: '#000' }
+              },
+              title: { 
+                display: true, 
+                text: 'Anzahl',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              }
+            },
+            x: {
+              title: { 
+                display: true, 
+                text: 'Verzug (Tage)',
+                font: { size: 16, weight: 'bold' },
+                color: '#000'
+              },
+              ticks: { font: { size: 14, color: '#000' } }
+            }
+          }
+        }
+      });
+    }
   }
 
   renderReleases();
