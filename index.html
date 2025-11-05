@@ -15,6 +15,16 @@
     0%, 100% { transform: translateY(0); }
     50% { transform: translateY(-20px); }
   }
+
+  /* Responsive: stack content so the table sits below the container on mobile */
+  @media (max-width: 1068px) {
+    body { display: block !important; height: auto !important; }
+    .container { margin-top: 270px !important; }
+    #releaseOverview { margin: 3vw 3vw 3vw !important; }
+    .container h1 { font-size: 2.5em !important; }
+    #counterText { font-size: 2em !important; }
+    img[alt="Logo 1"], img[alt="Logo 2"] { width: 120px; height: 120px; }
+  }
 </style>
 
 </head>
@@ -28,6 +38,23 @@
     </div>
   </div>
   <img src="https://media1.giphy.com/media/ysFsUIf1xSmw7zz68Y/giphy.gif?cid=6c09b952y4axo2eadktw1gpudhyfcj0pvvqfvwd7hjm5x8fj&ep=v1_stickers_related&rid=giphy.gif&ct=s" alt="Floating Cat" class="floating-cat">
+    <div id="releaseOverview" style="max-width: 900px; margin: 300px auto 40px; background: #c5a3cacc; padding: 20px; border-radius: 12px; box-shadow: 0 4px 16px rgba(0,0,0,0.2); color: #222;">
+      <h2 style="margin-top: 0;">Veröffentlichungsübersicht & Verzögerungen</h2>
+      <div id="releaseStats" style="margin-bottom: 16px; font-size: 1.1em;"></div>
+      <div style="overflow-x: auto;">
+        <table id="releaseTable" style="width: 100%; border-collapse: collapse;">
+          <thead>
+            <tr>
+              <th style="text-align: left; padding: 8px; border-bottom: 2px transparent #aaa;">Ausgabe</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 2px transparent #aaa;">Geplant</th>
+              <th style="text-align: left; padding: 8px; border-bottom: 2px transparent #aaa;">Veröffentlicht</th>
+              <th style="text-align: right; padding: 8px; border-bottom: 2px transparent #aaa;">Verzug (Tage)</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>  
   <script src="script.js"></script>
 </body>
 </html>
