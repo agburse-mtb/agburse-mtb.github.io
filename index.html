@@ -30,17 +30,18 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding-top: 280px; /* Space for logos at top */
   }
 
   /* Responsive: stack content so the table sits below the container on mobile */
   @media (max-width: 1068px) {
     body { display: block !important; height: auto !important; }
     .container { 
-      margin-top: 270px !important; 
+      margin-top: 100px !important; 
       min-height: auto !important;
       padding-bottom: 20px;
     }
-    #releaseOverview { margin: 3vh 3vh 3vh !important; }
+    #releaseOverview { margin: 3vw 3vw 3vw !important; }
     .container h1 { font-size: 2.5em !important; }
     #counterText { font-size: 2em !important; }
     img[alt="Logo 1"], img[alt="Logo 2"] { width: 120px; height: 120px; }
